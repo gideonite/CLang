@@ -9,7 +9,7 @@ int length(char s[]);
 void detab(char detabbed[], char s[]);
 int tab_distance(int index);
 void entab(char entabbed[], char s[]);
-void fold_lines(char s[]);
+void fold_lines();
 
 int main(int argc, char **argv)
 {
@@ -29,8 +29,7 @@ int main(int argc, char **argv)
     //    putchar('\n');
     //}
 
-    char buffer[MAXLINE];
-    fold_lines(buffer);
+    fold_lines();
 }
 
 /*
@@ -113,7 +112,10 @@ void entab(char entabbed[], char s[])
     entabbed[j] = '\0';
 }
 
-#define LINE_LENGTH 80
+#define true  1
+#define false 0
+
+#define WRAP 80
 int is_space(char c);
 
 /*
@@ -122,38 +124,36 @@ int is_space(char c);
  * "Fold" long lines of input into two or more shorter lines after the last
  * non-blank character before the nth column of input.
  */
-void fold_lines(char s[])
+void fold_lines()
 {
-    // for each c in s, put c in b (the index is i % LINE_LENGTH) , when i %
-    // LINE_LENGTH == 0, write out b.
-    //
-    // Need to handle lines terminated by spaces.
-    //
-
     int c, i;
+    int buffer[WRAP+1];
+    int last_char=0;
 
-    for (i=1; (c = getchar()) != EOF; i++) {
-        putchar(c);
+    for (i=0; (c = getchar()) != EOF; ) {
+        buffer[i] = c;
 
-        if (i >= LINE_LENGTH) {
-            putchar('\n');
-            i = 1;
-        }
+        if (c != ' ' && c != '\t')
+            last_char = i;
 
-        if (c == '\n')
-            i = 1;
+        if (i == WRAP) {
+            for (int j=0; j <= last_char; j++)
+                putchar(buffer[j]);
 
-        if (is_space(c)) {
-            int space_count = 0;
-            while ( is_space(c = getchar()) && c != EOF && c != '\n')
-                space_count++;
-
-            int newlines = space_count / LINE_LENGTH;
-            for (int j=0; j < newlines; j++) {
+            if (buffer[last_char] != '\n')
                 putchar('\n');
-                i++;
-            }
+
+            i = 0;
+            last_char=0;
         }
+        else
+            i++;
+    }
+
+    // flush buffer
+    if (last_char != 0) {
+        for (int j=0; j <= last_char; j++)
+            putchar(buffer[j]);
     }
 }
 

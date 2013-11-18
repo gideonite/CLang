@@ -127,34 +127,37 @@ int is_space(char c);
 void fold_lines()
 {
     int c, i;
-    int buffer[WRAP+1];
-    int last_char=0;
+    int first=0;
+    int curr=0;
+    char buffer[WRAP+1];
 
     for (i=0; (c = getchar()) != EOF; ) {
+
         buffer[i] = c;
 
-        if (c != ' ' && c != '\t')
-            last_char = i;
+        if (c != ' ' || c != '\t') {
+            if (0 == first)
+                first = i;
+            curr = i;
+        }
 
-        if (i == WRAP) {
-            for (int j=0; j <= last_char; j++)
+        //printf("%d\n", i);
+
+        if ((curr - first > WRAP) || c == '\n') {
+            // put buffer
+            for (int j=first; j <= curr; j++)
                 putchar(buffer[j]);
 
-            if (buffer[last_char] != '\n')
-                putchar('\n');
-
+            first = 0;
+            curr = 0;
             i = 0;
-            last_char=0;
-        }
-        else
+        } else
             i++;
     }
 
     // flush buffer
-    if (last_char != 0) {
-        for (int j=0; j <= last_char; j++)
-            putchar(buffer[j]);
-    }
+    for (int j=first; j <= curr; j++)
+        putchar(buffer[j]);
 }
 
 int is_space(char c)

@@ -3,7 +3,17 @@
 
 #define MAXLINE 2000    /* max line input size */
 
-int getline(char s[]);
+/*
+ * Exercise 1-23
+ *
+ * Remove comments from a C program
+ *
+ * Basic Idea: Use mutual recursion to implement a finite state machine.
+ * Hopefully, whoever uses this program isn't writing tons and tons of
+ * comments =). To accomodate these terrrrible programmers, use trampolines,
+ * but that is beyond the current of this exercise.
+ *
+ * */
 
 void double_slash();
 void code();

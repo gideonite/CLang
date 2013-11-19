@@ -2,6 +2,7 @@
 
 #define MAXLINE 1000    /* max line input size */
 #define TABWIDTH 4
+#define WRAP 80
 
 int getline(char s[], int lim);
 int putstr(char s[]);
@@ -29,7 +30,7 @@ int main(int argc, char **argv)
     //    putchar('\n');
     //}
 
-    fold_lines();
+    //fold_lines();
 }
 
 /*
@@ -112,12 +113,6 @@ void entab(char entabbed[], char s[])
     entabbed[j] = '\0';
 }
 
-#define true  1
-#define false 0
-
-#define WRAP 80
-int is_space(char c);
-
 /*
  * Exercise 1-22
  *
@@ -141,12 +136,12 @@ void fold_lines()
             curr = i;
         }
 
-        //printf("%d\n", i);
-
-        if ((curr - first > WRAP) || c == '\n') {
-            // put buffer
-            for (int j=first; j <= curr; j++)
+        if (WRAP == i || '\n' == c) {
+            for (int j=0; j <= last_char; j++)
                 putchar(buffer[j]);
+
+            if (buffer[last_char] != '\n')
+                putchar('\n');
 
             first = 0;
             curr = 0;
@@ -158,11 +153,6 @@ void fold_lines()
     // flush buffer
     for (int j=first; j <= curr; j++)
         putchar(buffer[j]);
-}
-
-int is_space(char c)
-{
-    return (c == ' ' || c == '\t');
 }
 
 int getline(char s[], int lim)

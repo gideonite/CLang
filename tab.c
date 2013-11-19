@@ -136,11 +136,11 @@ void fold_lines()
         if (c != ' ' && c != '\t')
             last_char = i;
 
-        if (i == WRAP) {
+        if (WRAP == i || '\n' == c) {
             for (int j=0; j <= last_char; j++)
                 putchar(buffer[j]);
 
-            if (buffer[last_char] != '\n')
+            if (c != '\n')
                 putchar('\n');
 
             i = 0;
@@ -148,12 +148,6 @@ void fold_lines()
         }
         else
             i++;
-    }
-
-    // flush buffer
-    if (last_char != 0) {
-        for (int j=0; j <= last_char; j++)
-            putchar(buffer[j]);
     }
 }
 

@@ -16,22 +16,6 @@ int main(int argc, char **argv)
     code();
 }
 
-int getline(char s[])
-{
-    int c;
-    int i = 0;
-    while ( ((c = getchar()) != EOF) && (i <= (MAXLINE - 1))) {
-        s[i] = c;
-        i++;
-
-        if ('\n' == c)
-            break;
-    }
-    s[i] = '\0';
-
-    return i;
-}
-
 void code()
 {
     char c = getchar();

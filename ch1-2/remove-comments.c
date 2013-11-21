@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MAXLINE 2000    /* max line input size */
-
 /*
  * Exercise 1-23
  *

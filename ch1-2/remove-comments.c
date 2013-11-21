@@ -9,7 +9,7 @@
  * Basic Idea: Use mutual recursion to implement a finite state machine.
  * Hopefully, whoever uses this program isn't writing tons and tons of
  * comments =). To accomodate these terrrrible programmers, use trampolines,
- * but that is beyond the current of this exercise.
+ * but that is beyond the scope of this exercise.
  *
  * */
 

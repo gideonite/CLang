@@ -1,0 +1,7 @@
+some code here
+// a comment
+// another comment
+and here
+/* another comment */
+and here
+/* a comment // within a comment */

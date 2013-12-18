@@ -58,6 +58,9 @@ int main(int argc, char **argv)
         char_count++;
     }
 
+    munmap(addr, length);
+
+
     /* Print the resulting counts. */
     printf("%d\t%d\t%d\t%s\n", newline_count, space_count, char_count, filename);
 

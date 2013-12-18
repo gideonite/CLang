@@ -40,13 +40,13 @@ int main(int argc, char **argv)
     addr = mmap(NULL, length + offset - pa_offset, PROT_READ, MAP_PRIVATE, fd,
             pa_offset);
 
+    /* Count away */
     int char_count = 0;
     int space_count = 0;
     int newline_count = 0;
     int i;
     char curr;
     for (i=0; i < length; i++) {
-
         curr = *(addr+i);
 
         if ( (' ' == curr) || ('\t' == curr) || ('\n' == curr) )
@@ -58,6 +58,7 @@ int main(int argc, char **argv)
         char_count++;
     }
 
+    /* Print the resulting counts. */
     printf("%d\t%d\t%d\t%s\n", newline_count, space_count, char_count, filename);
 
     /* Close the input file. */

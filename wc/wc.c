@@ -17,7 +17,13 @@ struct stat sb;
 
 int main(int argc, char **argv)
 {
-    char *filename = "e.txt";
+
+    if (2 != argc) {
+        printf("This implementation of wc accepts a single filename only\n");
+        return 1;
+    }
+
+    char *filename = argv[1];
 
     /* Open the input file. */
     fd = open(filename, O_RDONLY);
@@ -46,10 +52,13 @@ int main(int argc, char **argv)
     int newline_count = 0;
     int i;
     char curr;
+    char prev;
     for (i=0; i < length; i++) {
+        prev = *(addr);
         curr = *(addr+i);
 
-        if ( (' ' == curr) || ('\t' == curr) || ('\n' == curr) )
+        if ((' ' != prev && '\t' != prev && '\n' != prev)
+                && ((' ' == curr) || ('\t' == curr) || ('\n' == curr)))
             space_count++;
 
         if ('\n' == curr)
@@ -62,7 +71,7 @@ int main(int argc, char **argv)
 
 
     /* Print the resulting counts. */
-    printf("%d\t%d\t%d\t%s\n", newline_count, space_count, char_count, filename);
+    printf("%d %d %d %s\n", newline_count, space_count, char_count, filename);
 
     /* Close the input file. */
     close_success = close(fd);

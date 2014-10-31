@@ -9,21 +9,39 @@
 #define handle_error(msg) \
     do { perror(msg); exit(EXIT_FAILURE); } while (0);
 
-int fd, close_success;
-char *addr;
-off_t offset, pa_offset;
-size_t length;
-struct stat sb;
-
-int main(int argc, char **argv)
+/* Count away */
+int count_words_from_addr(int length, char* start_addr)
 {
+    int char_count = 0;
+    int space_count = 0;
+    int newline_count = 0;
+    int i;
+    char curr;
+    char prev;
+    for (i=0; i < length; i++) {
+        prev = *(start_addr);       // TODO this should probably be rethought.
+        curr = *(start_addr+i);
 
-    if (2 != argc) {
-        printf("This implementation of wc accepts a single filename only\n");
-        return 1;
+        if ((' ' != prev && '\t' != prev && '\n' != prev)
+                && ((' ' == curr) || ('\t' == curr) || ('\n' == curr)))
+            space_count++;
+
+        if ('\n' == curr)
+            newline_count++;
+
+        char_count++;
     }
 
-    char *filename = argv[1];
+    return newline_count;
+}
+
+int count_words(char* filename)
+{
+    int fd, close_success;
+    char *addr;
+    off_t offset, pa_offset;
+    size_t length;
+    struct stat sb;
 
     /* Open the input file. */
     fd = open(filename, O_RDONLY);
@@ -46,35 +64,27 @@ int main(int argc, char **argv)
     addr = mmap(NULL, length + offset - pa_offset, PROT_READ, MAP_PRIVATE, fd,
             pa_offset);
 
-    /* Count away */
-    int char_count = 0;
-    int space_count = 0;
-    int newline_count = 0;
-    int i;
-    char curr;
-    char prev;
-    for (i=0; i < length; i++) {
-        prev = *(addr);
-        curr = *(addr+i);
-
-        if ((' ' != prev && '\t' != prev && '\n' != prev)
-                && ((' ' == curr) || ('\t' == curr) || ('\n' == curr)))
-            space_count++;
-
-        if ('\n' == curr)
-            newline_count++;
-
-        char_count++;
-    }
+    int newline_count = count_words_from_addr(length, addr);
 
     munmap(addr, length);
 
-
     /* Print the resulting counts. */
-    printf("%d %d %d %s\n", newline_count, space_count, char_count, filename);
+    //printf("%d %d %d %s\n", newline_count, space_count, char_count, filename);
 
     /* Close the input file. */
-    close_success = close(fd);
+    // TODO is there a finally clause in C? How can I be absolutely sure that this file is closed?
+    close_success = close(fd);      // TODO not using this right now
 
-    return close_success;
+    return newline_count;
+}
+
+int main(int argc, char **argv)
+{
+    for (int i = 1; // argv[0] == name of this file
+            i < argc; i++) {
+        char* filename = argv[i];
+        int count = count_words(filename);
+        printf("%d	%d	%d	%s", count, count, count, filename);        // TODO how to return multiple values
+    }
+
 }

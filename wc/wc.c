@@ -10,7 +10,7 @@
     do { perror(msg); exit(EXIT_FAILURE); } while (0);
 
 /* Count away */
-int count_words_from_addr(int length, char* start_addr)
+int* count_words_from_addr(int length, char* start_addr)
 {
     int char_count = 0;
     int space_count = 0;
@@ -32,14 +32,13 @@ int count_words_from_addr(int length, char* start_addr)
         char_count++;
     }
 
-    return newline_count;
+    return (int[3]) {char_count, space_count, newline_count};
 }
 
-int count_words(char* filename)
+int* count_words(char* filename)
 {
     int fd, close_success;
     char *addr;
-    off_t offset, pa_offset;
     size_t length;
     struct stat sb;
 
@@ -52,30 +51,27 @@ int count_words(char* filename)
     if (fstat(fd, &sb) == -1)
         handle_error("fstat");
 
-    int page_size = sysconf(_SC_PAGE_SIZE);
-    int minus_pagesize = ~(page_size - 1);
-    //offset = page_size * 2;
-    offset = 0;
-    pa_offset = offset & minus_pagesize;   // offset % page_size == 0. TODO why?
-
-    length = sb.st_size - offset;
+    length = sb.st_size;
 
     /* Memory map the file. */
-    addr = mmap(NULL, length + offset - pa_offset, PROT_READ, MAP_PRIVATE, fd,
-            pa_offset);
+    addr = mmap(NULL,
+            length,
+            PROT_READ,
+            MAP_PRIVATE,
+            fd,
+            0);
 
-    int newline_count = count_words_from_addr(length, addr);
+    int* counts = count_words_from_addr(length, addr);
 
+    /* Free the memory */
     munmap(addr, length);
 
-    /* Print the resulting counts. */
-    //printf("%d %d %d %s\n", newline_count, space_count, char_count, filename);
+    /* Close the input file */
+    close_success = close(fd);
 
-    /* Close the input file. */
-    // TODO is there a finally clause in C? How can I be absolutely sure that this file is closed?
-    close_success = close(fd);      // TODO not using this right now
+    // TODO do something with close_success.
 
-    return newline_count;
+    return counts;
 }
 
 int main(int argc, char **argv)
@@ -83,8 +79,7 @@ int main(int argc, char **argv)
     for (int i = 1; // argv[0] == name of this file
             i < argc; i++) {
         char* filename = argv[i];
-        int count = count_words(filename);
-        printf("%d	%d	%d	%s", count, count, count, filename);        // TODO how to return multiple values
+        int* counts = count_words(filename);
+        printf("%d	%d	%d	%s\n", counts[0], counts[1], counts[2], filename);
     }
-
 }

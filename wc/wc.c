@@ -9,37 +9,40 @@
 #define handle_error(msg) \
     do { perror(msg); exit(EXIT_FAILURE); } while (0);
 
-/* Count away */
-int* count_words_from_addr(int length, char* start_addr)
+/* Initialize global counts */
+//int char_count = 0;
+//int space_count = 0;
+//int newline_count = 0;
+//
+//size_t size;
+//char* start;
+//
+///* Count away */
+//void count_words_from_addr()
+//{
+//    int i;
+//    char curr;
+//    char prev;
+//    for (i=0; i < size; i++) {
+//        prev = *(start_addr);       // TODO this should probably be rethought.
+//        curr = *(start_addr+i);
+//
+//        if ((' ' != prev && '\t' != prev && '\n' != prev)
+//                && ((' ' == curr) || ('\t' == curr) || ('\n' == curr)))
+//            space_count++;
+//
+//        if ('\n' == curr)
+//            newline_count++;
+//
+//        char_count++;
+//    }
+//}
+
+char* mapfile(char* filename, int* fd_p, size_t* size_p)
 {
-    int char_count = 0;
-    int space_count = 0;
-    int newline_count = 0;
-    int i;
-    char curr;
-    char prev;
-    for (i=0; i < length; i++) {
-        prev = *(start_addr);       // TODO this should probably be rethought.
-        curr = *(start_addr+i);
-
-        if ((' ' != prev && '\t' != prev && '\n' != prev)
-                && ((' ' == curr) || ('\t' == curr) || ('\n' == curr)))
-            space_count++;
-
-        if ('\n' == curr)
-            newline_count++;
-
-        char_count++;
-    }
-
-    return (int[3]) {char_count, space_count, newline_count};
-}
-
-int* count_words(char* filename)
-{
-    int fd, close_success;
+    int fd;
     char *addr;
-    size_t length;
+    size_t size = *size_p;
     struct stat sb;
 
     /* Open the input file. */
@@ -51,35 +54,41 @@ int* count_words(char* filename)
     if (fstat(fd, &sb) == -1)
         handle_error("fstat");
 
-    length = sb.st_size;
+    size = sb.st_size;
 
     /* Memory map the file. */
     addr = mmap(NULL,
-            length,
+            size,
             PROT_READ,
             MAP_PRIVATE,
             fd,
             0);
 
-    int* counts = count_words_from_addr(length, addr);
+    /* Make these avaiable to the caller */
+    *fd_p = fd;
+    *size_p = size;
 
-    /* Free the memory */
-    munmap(addr, length);
-
-    /* Close the input file */
-    close_success = close(fd);
-
-    // TODO do something with close_success.
-
-    return counts;
+    return addr;
 }
 
 int main(int argc, char **argv)
 {
-    for (int i = 1; // argv[0] == name of this file
-            i < argc; i++) {
-        char* filename = argv[i];
-        int* counts = count_words(filename);
-        printf("%d	%d	%d	%s\n", counts[0], counts[1], counts[2], filename);
+    int fd;
+    size_t size;
+    char* addr = mapfile("test-data/moby-dick.txt", &fd, &size);
+
+    for (int i=0; i<size; i++) {
+        char c = *(addr+i);
+        printf("%c", c);
     }
+
+    //munmap(addr, size);
+    //close(fd);
+
+    //for (int i = 1; // argv[0] == name of this file
+    //        i < argc; i++) {
+    //    char* filename = argv[i];
+    //    count_words(filename);
+    //    printf("%d	%d	%d	%s\n", newline_count, space_count, char_count, filename);
+    //}
 }

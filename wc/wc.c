@@ -5,6 +5,7 @@
 #include <sys/mman.h> /* mmap() is defined in this header */
 #include <fcntl.h>
 #include <unistd.h>
+#include <ctype.h>  /* isalpha(char c) */
 
 #define handle_error(msg) \
     do { perror(msg); exit(EXIT_FAILURE); } while (0);
@@ -71,24 +72,41 @@ char* mapfile(char* filename, int* fd_p, size_t* size_p)
     return addr;
 }
 
+//int isalpha(char c)
+//{
+//    return c != ' ' && c != '\t' && c != '\n';
+//}
+
 int main(int argc, char **argv)
 {
     int fd;
     size_t size;
-    char* addr = mapfile("test-data/moby-dick.txt", &fd, &size);
+    char* filename = "test-data/moby-dick.txt";
+    char* addr = mapfile(filename, &fd, &size);
 
+    int char_count = size;
+    int line_count = 0;
+    int word_count = 0;
+
+    int inword = 0;
     for (int i=0; i<size; i++) {
-        char c = *(addr+i);
-        printf("%c", c);
+        char curr = *(addr+i);
+
+        if (isalpha(curr) && !inword) {
+            word_count++;
+            inword = 1;
+        }
+
+        inword = isalpha(curr);
+
+        if (curr == '\n')
+            line_count++;
     }
 
-    //munmap(addr, size);
-    //close(fd);
+    munmap(addr, size);
+    close(fd);
 
-    //for (int i = 1; // argv[0] == name of this file
-    //        i < argc; i++) {
-    //    char* filename = argv[i];
-    //    count_words(filename);
-    //    printf("%d	%d	%d	%s\n", newline_count, space_count, char_count, filename);
-    //}
+    printf("%d\t%d\t%d\n", line_count, word_count, char_count);
+
+    //printf("%d	%d	%d	%s\n", newline_count, space_count, char_count, filename);
 }

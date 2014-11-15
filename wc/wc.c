@@ -72,16 +72,15 @@ char* mapfile(char* filename, int* fd_p, size_t* size_p)
     return addr;
 }
 
-//int isalpha(char c)
-//{
-//    return c != ' ' && c != '\t' && c != '\n';
-//}
-
 int main(int argc, char **argv)
 {
+
+    if (argc != 2)
+        exit(-1);
+
     int fd;
     size_t size;
-    char* filename = "test-data/moby-dick.txt";
+    char* filename = argv[1];
     char* addr = mapfile(filename, &fd, &size);
 
     int char_count = size;
@@ -89,24 +88,23 @@ int main(int argc, char **argv)
     int word_count = 0;
 
     int inword = 0;
+    char prev = *addr;
     for (int i=0; i<size; i++) {
         char curr = *(addr+i);
 
-        if (isalpha(curr) && !inword) {
+        if (isspace(curr) && !isspace(prev)) {
             word_count++;
-            inword = 1;
+            inword = 0;
         }
-
-        inword = isalpha(curr);
 
         if (curr == '\n')
             line_count++;
+
+        prev = curr;
     }
 
     munmap(addr, size);
     close(fd);
 
-    printf("%d\t%d\t%d\n", line_count, word_count, char_count);
-
-    //printf("%d	%d	%d	%s\n", newline_count, space_count, char_count, filename);
+    printf("\t%d\t%d\t%d\t%s\n", line_count, word_count, char_count, filename);
 }

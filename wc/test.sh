@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Running tests..."
+echo
+
 DATA_DIR="test-data"
 
 TEST_COUNT=0

@@ -10,35 +10,6 @@
 #define handle_error(msg) \
     do { perror(msg); exit(EXIT_FAILURE); } while (0);
 
-/* Initialize global counts */
-//int char_count = 0;
-//int space_count = 0;
-//int newline_count = 0;
-//
-//size_t size;
-//char* start;
-//
-///* Count away */
-//void count_words_from_addr()
-//{
-//    int i;
-//    char curr;
-//    char prev;
-//    for (i=0; i < size; i++) {
-//        prev = *(start_addr);       // TODO this should probably be rethought.
-//        curr = *(start_addr+i);
-//
-//        if ((' ' != prev && '\t' != prev && '\n' != prev)
-//                && ((' ' == curr) || ('\t' == curr) || ('\n' == curr)))
-//            space_count++;
-//
-//        if ('\n' == curr)
-//            newline_count++;
-//
-//        char_count++;
-//    }
-//}
-
 char* mapfile(char* filename, int* fd_p, size_t* size_p)
 {
     int fd;
@@ -72,21 +43,27 @@ char* mapfile(char* filename, int* fd_p, size_t* size_p)
     return addr;
 }
 
-int main(int argc, char **argv)
+/**
+ * Loops over every character in the file and counts the numbers of lines,
+ * word, and chars. Populates the given variables with the corresponding
+ * values.
+ */
+int wc(char* filename, int* line_count_p, int* word_count_p, int* char_count_p)
 {
-
-    if (argc != 2)
-        exit(-1);
-
     int fd;
     size_t size;
-    char* filename = argv[1];
     char* addr = mapfile(filename, &fd, &size);
 
-    int char_count = size;
+    int char_count = size;      /* well that was easy, thanks `size_t`*/
     int line_count = 0;
     int word_count = 0;
 
+    /**
+     * For every character in the mapped file, if the current character is a
+     * space and the previous character is not a space, then we have
+     * effectively exited a word and we should incremement our word count. The
+     * rest is trivial.
+     */
     int inword = 0;
     char prev = *addr;
     for (int i=0; i<size; i++) {
@@ -104,7 +81,22 @@ int main(int argc, char **argv)
     }
 
     munmap(addr, size);
-    close(fd);
 
-    printf("\t%d\t%d\t%d\t%s\n", line_count, word_count, char_count, filename);
+    /* Make these avaiable to the caller */
+    *line_count_p = line_count;
+    *word_count_p = word_count;
+    *char_count_p = char_count;
+
+    return close(fd);
+}
+
+int main(int argc, char **argv)
+{
+    for (int i=1; i<argc; i++)
+    {
+        char* filename = argv[i];
+        int line_count, word_count, char_count;
+        wc(filename, &line_count, &word_count, &char_count);
+        printf("\t%d\t%d\t%d\t%s\n", line_count, word_count, char_count, filename);
+    }
 }
